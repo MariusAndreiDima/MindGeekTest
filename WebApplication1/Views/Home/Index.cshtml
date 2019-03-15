@@ -1,0 +1,17 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div>
+    @foreach (KeyArtImagesD kaid in Helper.keyArtImagesDownloaded.Where(a => a.Status == "Ok"))
+    {
+        <a href="home/movie?id=@kaid.Id">
+            <img src="@kaid.Source" height="@kaid.H" width="@kaid.W" />
+        </a>
+    }
+    </div>
+@*<video width="320" height="240"  preload="auto" controls>
+    <source src="~/keyArtImages/file3.mp4" type="video/mp4">
+    <source src="http://proxy.video.sky.com/video/clip-00u5vtnn"type="video/mp4" />
+
+</video>*@

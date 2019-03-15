@@ -1,0 +1,90 @@
+﻿<h2>@ViewData["Headline"]</h2>
+<h3>@ViewData["Body"]</h3>
+<div>
+    <p><b>CAST :</b></p>
+    @foreach (Cast c in ViewBag.Cast)
+    {
+        <p>@c.name  </p>
+    }
+
+    <p><b>Directors :</b></p>
+    @foreach (Directors d in ViewBag.Directors)
+    {
+        <p>@d.name</p>
+    }
+
+    <p>Cert : @ViewData["Cert"]</p>
+    <p>Class : @ViewData["Class"]</p>
+    <p>Duration : @ViewData["Duration"]</p>
+
+    <p><b>Genres :</b></p>
+    @foreach (string g in ViewBag.Genres)
+    {
+        
+        <p>@g</p>
+        
+    }
+</div>
+<div>
+    
+        @foreach (CardImagesD c in ViewBag.CardImages)
+        {
+            @*<a href="contact?id=@c.Id">*@
+                <img src="~/CardImages/@c.Source.Split('/')[c.Source.Split('/').Length-1]" width="@c.W" height="@c.H" onerror="if (this.src != 'emptyimage.png') this.src = '/images/emptyimage.png'" />
+            @*</a>*@
+        }
+    
+</div>
+<div>
+    <p><b>Last updated :</b> @ViewData["LastUpdated"]</p>
+    <p><b>Quote :</b> @ViewData["Quote"]</p>
+    <p><b>Rating :</b> @ViewData["Rating"]</p>
+    <p><b>ReviewAuthor :</b> @ViewData["ReviewAuthor"]</p>
+    <p><b>SkyGoId :</b> @ViewData["SkyGoId"]</p>
+    <p><b>SkyGoUrl :</b></p><p><a href="@ViewData["SkyGoUrl"]">Here</a></p>
+    <p><b>Sum :</b> @ViewData["Sum"]</p>
+    <p><b>Url :</b> @ViewData["Url"]</p>
+    <p><b>Year : </b> @ViewData["Year"]</p>
+    <p><b>Viewing window :</b></p>
+    <p><b>Title : </b> @ViewData["Title"]</p>
+    <p><b>StartDate : </b> @ViewData["StartDate"]</p>
+    <p><b>WayToWatch : </b> @ViewData["WayToWatch"]</p>
+    <p><b>EndDate : </b> @ViewData["EndDate"]</p>
+
+</div>
+<div>
+    @foreach (VideosD vd in ViewBag.Videos)
+    { 
+        <p>@vd.Title</p>
+        <p>Type : @vd.Type</p>
+        <video width="320" height="240" controls>
+            <source src="~/Videos/@vd.Source.Split('/')[vd.Source.Split('/').Length - 1]" type="video/mp4">
+        </video>
+
+
+    }
+</div>
+<div>
+    @foreach (AlternativeVideosD avd in ViewBag.AlternativeVideos)
+    {
+        <p>Quality : @avd.Quality</p>
+        
+        <video width="320" height="240" controls>
+            <source src="~/AlternativeVideos/@avd.Source.Split('/')[avd.Source.Split('/').Length - 1]" type="video/mp4">
+        </video>
+
+
+    }
+</div>
+
+@*<address>
+    One Microsoft Way<br />
+    Redmond, WA 98052-6399<br />
+    <abbr title="Phone">P:</abbr>
+    425.555.0100
+</address>
+
+<address>
+    <strong>Support:</strong> <a href="mailto:Support@example.com">Support@example.com</a><br />
+    <strong>Marketing:</strong> <a href="mailto:Marketing@example.com">Marketing@example.com</a>
+</address>*@
