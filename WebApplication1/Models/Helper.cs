@@ -39,13 +39,13 @@ namespace MindGeekTest.Models
             }
 
             jsonContent = JsonConvert.DeserializeObject<List<MoviesDetails>>(contentJson);
-            DownloadRess(jsonContent);
+            await DownloadRess(jsonContent);
         }
 
 
 
 
-        public async static void DownloadRess(List<MoviesDetails> movieDetailsList)
+        public async static Task DownloadRess(List<MoviesDetails> movieDetailsList)
         {
             Directory.CreateDirectory($"wwwroot/CardImages/");
             Directory.CreateDirectory($"wwwroot/KeyArtImages/");
