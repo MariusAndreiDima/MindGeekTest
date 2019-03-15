@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -59,52 +60,64 @@ namespace MindGeekTest.Models
 
             foreach (MoviesDetails md in movieDetailsList)
             {
-                foreach (CardImages cd in md.cardImages)
+                foreach (CardImages cd in md.CardImages)
                 {
-                    tasks.Add(Task.Factory.StartNew(() =>
+                    string fileName = $"{md.Id}{md.CardImages.IndexOf(cd).ToString()}.jpg";
+                    CardImagesD cid = new CardImagesD(md.Headline, md.Id, cd.Url, cd.H, cd.W, "NotOk", $@"CardImages/{fileName}");
+                    cardImagesDownloaded.Add(cid);
+
+                    tasks.Add(Task.Run(async () =>
                         {
-                            using (WebClient client = new WebClient())
+                            using (HttpClient client = new HttpClient())
                             {
                                 try
                                 {
-
-                                    client.DownloadFileCompleted += Client_DownloadFileCompletedKA;
-
-                                    string fileName = $"{md.id}{md.cardImages.IndexOf(cd).ToString()}.jpg";
-                                    CardImagesD cid = new CardImagesD(md.headline, md.id, cd.url, cd.h, cd.w, "Ok", $@"CardImages/{fileName}");
-                                    cardImagesDownloaded.Add(cid);
-                                    client.DownloadFileTaskAsync(new Uri($@"{cd.url}"), $@"wwwroot/CardImages/{fileName}");
+                                    byte[] file = await client.GetByteArrayAsync(new Uri($@"{cd.Url}"));
+                                    if (file.Length == 0) return;
+                                    using (FileStream SourceStream = File.Open($@"wwwroot/CardImages/{fileName}", FileMode.OpenOrCreate))
+                                    {
+                                        SourceStream.Seek(0, SeekOrigin.End);
+                                        await SourceStream.WriteAsync(file, 0, file.Length);
+                                    }
                                 }
                                 catch (WebException we)
                                 {
                                     Debug.WriteLine($"{we.Message}");
                                 }
+                                catch (Exception e)
+                                {
 
+                                }
                             }
-
                         }));
                 }
-                foreach (KeyArtImages kai in md.keyArtImages)
+                foreach (KeyArtImages kai in md.KeyArtImages)
                 {
-                    tasks.Add(Task.Factory.StartNew(() =>
+                    string fileName = $"{md.Id}{md.KeyArtImages.IndexOf(kai).ToString()}.jpg";
+                    KeyArtImagesD kaid = new KeyArtImagesD(md.Headline, md.Id, kai.Url, kai.H, kai.W, "NotOk", $@"KeyArtImages/{fileName}");
+                    keyArtImagesDownloaded.Add(kaid);
+                    tasks.Add(Task.Run(async () =>
                     {
-                        using (WebClient client = new WebClient())
+                        using (HttpClient client = new HttpClient())
                         {
                             try
                             {
-
-                                client.DownloadFileCompleted += Client_DownloadFileCompleted;
-
-                                string fileName = $"{md.id}{md.keyArtImages.IndexOf(kai).ToString()}.jpg";
-                                KeyArtImagesD kaid = new KeyArtImagesD(md.headline, md.id, kai.url, kai.h, kai.w, "Ok", $@"KeyArtImages/{fileName}");
-                                keyArtImagesDownloaded.Add(kaid);
-                                client.DownloadFileTaskAsync(new Uri($@"{kai.url}"), $@"wwwroot/KeyArtImages/{fileName}");
+                                byte[] file = await client.GetByteArrayAsync(new Uri($@"{kai.Url}"));
+                                if (file.Length == 0) return;
+                                using (FileStream SourceStream = File.Open($@"wwwroot/KeyArtImages/{fileName}", FileMode.OpenOrCreate))
+                                {
+                                    SourceStream.Seek(0, SeekOrigin.End);
+                                    await SourceStream.WriteAsync(file, 0, file.Length);
+                                }
                             }
                             catch (WebException we)
                             {
                                 Debug.WriteLine($"{we.Message}");
                             }
+                            catch (Exception e)
+                            {
 
+                            }
                         }
 
                     }));
@@ -112,96 +125,127 @@ namespace MindGeekTest.Models
 
 
             }
-            await Task.WhenAll(tasks);
+            //await Task.WhenAll(tasks);
+            //tasks.Clear();
 
 
 
             foreach (MoviesDetails md in movieDetailsList)
             {
-                if (md.videos != null)
+                if (md.Videos != null)
                 {
-                    foreach (Videos v in md.videos)
-                        if (v.alternatives != null)
+                    foreach (Videos v in md.Videos)
+                        if (v.Alternatives != null)
                         {
-                            foreach (Alternatives a in v.alternatives)
+                            foreach (Alternatives a in v.Alternatives)
                             {
-                                tasks.Add(Task.Factory.StartNew(() =>
+                                string fileName = $"{md.Id}{md.Videos.IndexOf(v)}{v.Alternatives.IndexOf(a).ToString()}.mp4";
+                                AlternativeVideosD avd = new AlternativeVideosD(md.Headline, md.Id, a.Quality, a.Url, "NotOk", $@"AlternativeVideos/{fileName}");
+                                alternativeVideosDownloaded.Add(avd);
+
+                                tasks.Add(Task.Run(async () =>
                                 {
-                                    using (WebClient client = new WebClient())
+                                    using (HttpClient client = new HttpClient())
                                     {
                                         try
                                         {
 
                                             //client.DownloadFileCompleted += Client_DownloadFileCompleted;
+                                            client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.155 Safari/537.36");
+                                            byte[] file = await client.GetByteArrayAsync(new Uri($@"{a.Url}"));
+                                            if (file.Length == 0) return;
+                                            using (FileStream SourceStream = File.Open($@"wwwroot/AlternativeVideos/{fileName}", FileMode.OpenOrCreate))
+                                            {
+                                                SourceStream.Seek(0, SeekOrigin.End);
+                                                await SourceStream.WriteAsync(file, 0, file.Length);
+                                            }
 
-                                            string fileName = $"{md.id}{md.videos.IndexOf(v)}{v.alternatives.IndexOf(a).ToString()}.mp4";
-                                            AlternativeVideosD avd = new AlternativeVideosD(md.headline, md.id, a.quality, a.url, "Ok", $@"AlternativeVideos/{fileName}");
-                                            alternativeVideosDownloaded.Add(avd);
-                                            HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(a.url);
-                                            req.UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.155 Safari/537.36";
-                                            HttpWebResponse res = (HttpWebResponse)req.GetResponse();
-                                            client.DownloadFileTaskAsync(new Uri($@"{a.url}"), $@"wwwroot/AlternativeVideos/{fileName}");
+
+                                           
                                         }
                                         catch (WebException we)
                                         {
-                                            using (WebResponse response = we.Response)
-                                            {
-                                                string fileName = $"{md.id}{md.videos.IndexOf(v)}{v.alternatives.IndexOf(a).ToString()}.mp4";
-                                                HttpWebResponse httpResponse = (HttpWebResponse)response;
-                                                client.DownloadFileTaskAsync(new Uri($@"{httpResponse.ResponseUri}"), $@"wwwroot/AlternativeVideos/{fileName}");
-                                            }
+                                            //byte[] file = await client.GetByteArrayAsync(new Uri($@"{we.Response.ResponseUri}"));
+                                            //if (file.Length == 0) return;
+                                            //using (FileStream SourceStream = File.Open($@"wwwroot/AlternativeVideos/{fileName}", FileMode.OpenOrCreate))
+                                            //{
+                                            //    SourceStream.Seek(0, SeekOrigin.End);
+                                            //    await SourceStream.WriteAsync(file, 0, file.Length);
+                                            //}
                                         }
+                                        catch (Exception e)
+                                        {
 
+                                        }
                                     }
-
                                 }));
                             }
                         }
                 }
             }
-            await Task.WhenAll(tasks);
+            
 
             foreach (MoviesDetails md in movieDetailsList)
             {
-                if (md.videos != null)
+                if (md.Videos != null)
                 {
-                    foreach (Videos v in md.videos)
+                    foreach (Videos v in md.Videos)
+                    {
+                        List<AlternativeVideosD> avdList = new List<AlternativeVideosD>();
+                        avdList.AddRange(alternativeVideosDownloaded.FindAll(a => a.Id == md.Id));
+                        string fileName = $"{md.Id}{md.Videos.IndexOf(v)}.mp4";
+                        VideosD vd = new VideosD(md.Headline, md.Id, v.Title, avdList, v.Type, v.Url, "NotOk", $@"Videos/{fileName}");
+                        videosDownloaded.Add(vd);
 
-                        tasks.Add(Task.Factory.StartNew(() =>
+                        tasks.Add(Task.Run(async () =>
                         {
-                            using (WebClient client = new WebClient())
+                            using (HttpClient client = new HttpClient())
                             {
                                 try
                                 {
-                                    List<AlternativeVideosD> avdList = new List<AlternativeVideosD>();
-                                    avdList.AddRange(alternativeVideosDownloaded.FindAll(a => a.Id == md.id));
-                                    string fileName = $"{md.id}{md.videos.IndexOf(v)}.mp4";
-                                    VideosD vd = new VideosD(md.headline, md.id, v.title, avdList, v.type, v.url, "Ok", $@"Videos/{fileName}");
-                                    videosDownloaded.Add(vd);
-                                    HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(v.url);
-                                    req.UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.155 Safari/537.36";
-                                    HttpWebResponse res = (HttpWebResponse)req.GetResponse();
-                                   client.DownloadFileTaskAsync(new Uri($@"{v.url}"), $@"wwwroot/Videos/{fileName}");
+
+                                    client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.155 Safari/537.36");
+                                    byte[] file = await client.GetByteArrayAsync(new Uri($@"{v.Url}"));
+                                    if (file.Length == 0) return;
+                                    using (FileStream SourceStream = File.Open($@"wwwroot/Videos/{fileName}", FileMode.OpenOrCreate))
+                                    {
+                                        SourceStream.Seek(0, SeekOrigin.End);
+                                        await SourceStream.WriteAsync(file, 0, file.Length);
+                                    }
+                                   
                                 }
                                 catch (WebException we)
                                 {
-                                    using (WebResponse response = we.Response)
-                                    {
-                                        string fileName = $"{md.id}{md.videos.IndexOf(v)}.mp4";
-                                        HttpWebResponse httpResponse = (HttpWebResponse)response;
-                                        client.DownloadFileTaskAsync(new Uri($@"{httpResponse.ResponseUri}"), $@"wwwroot/Videos/{fileName}");    
-                                    }
+
+                                    //byte[] file = await client.GetByteArrayAsync(new Uri($@"{we.Response.ResponseUri}"));
+                                    //if (file.Length == 0) return;
+                                    //using (FileStream SourceStream = File.Open($@"wwwroot/Videos/{fileName}", FileMode.OpenOrCreate))
+                                    //{
+                                    //    SourceStream.Seek(0, SeekOrigin.End);
+                                    //    await SourceStream.WriteAsync(file, 0, file.Length);
+                                    //}
+                                    
+                                }
+                                catch(Exception e)
+                                {
+
                                 }
 
                             }
 
                         }));
-
+                    }
 
                 }
             }
             await Task.WhenAll(tasks);
+            tasks.Clear();
 
+            Thread.Sleep(1000);
+            Helper.StatusKeyArtImages();
+            Helper.StatusCardImages();
+            Helper.StatusVideos();
+            Helper.StatusAlternativeVideos();  
         }
         private static void Client_DownloadFileCompletedKA(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
         {
@@ -238,11 +282,12 @@ namespace MindGeekTest.Models
         {
             DirectoryInfo d = new DirectoryInfo("wwwroot/CardImages/");
             FileInfo[] fis = d.GetFiles();
-            foreach (FileInfo fi in fis) 
-            {      
-               if(fi.Length == 0)
-               {
-                    foreach(CardImagesD cid in cardImagesDownloaded)
+            foreach (FileInfo fi in fis)
+            {
+
+                foreach (CardImagesD cid in cardImagesDownloaded)
+                {
+                    if (fi.Length == 0)
                     {
                         if (cid != null)
                         {
@@ -250,10 +295,7 @@ namespace MindGeekTest.Models
                                 cid.Status = "NotOk";
                         }
                     }
-               }
-               else
-               {
-                    foreach (CardImagesD cid in cardImagesDownloaded)
+                    else
                     {
                         if (cid != null)
                         {
@@ -263,6 +305,7 @@ namespace MindGeekTest.Models
                     }
                 }
             }
+                
         }
 
         public static void StatusKeyArtImages()

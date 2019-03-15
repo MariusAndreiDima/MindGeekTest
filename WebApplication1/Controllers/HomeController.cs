@@ -16,47 +16,45 @@ namespace MindGeekTest.Controllers
     {
         public IActionResult Index()
         {
-            Helper.StatusKeyArtImages();
+
             return View();
         }
        
         public IActionResult Movie(string id)
         {
-            Helper.StatusCardImages();
-            Helper.StatusVideos();
-            Helper.StatusAlternativeVideos();  
-            IEnumerable<MoviesDetails> result = Helper.jsonContent.Where(s => s.id == id);
+            IEnumerable<MoviesDetails> result = Helper.jsonContent.Where(s => s.Id == id);
             if (result.Count() > 0)
             {
                 ViewBag.Movies = result;
-                ViewData["Headline"] = Helper.jsonContent.FirstOrDefault(s => s.id == id).headline;
-                ViewData["Body"] = Helper.jsonContent.FirstOrDefault(s => s.id == id).body;
-                ViewBag.Cast = Helper.jsonContent.FirstOrDefault(s => s.id == id).cast;
-                ViewData["Cert"] = Helper.jsonContent.FirstOrDefault(s => s.id == id).cert;
-                ViewData["Class"] = Helper.jsonContent.FirstOrDefault(s => s.id == id).cclass;
-                ViewBag.Directors = Helper.jsonContent.FirstOrDefault(s => s.id == id).directors;
-                var durationS = Convert.ToInt32(Helper.jsonContent.FirstOrDefault(s => s.id == id).duration);
+                var movieDetails = Helper.jsonContent.FirstOrDefault(s => s.Id == id); 
+                ViewData["Headline"] = movieDetails.Headline;
+                ViewData["Body"] = movieDetails.Body;
+                ViewBag.Cast = movieDetails.Cast;
+                ViewData["Cert"] = movieDetails.Cert;
+                ViewData["Class"] = movieDetails.Class;
+                ViewBag.Directors = movieDetails.Directors;
+                var durationS = Convert.ToInt32(movieDetails.Duration);
                 ViewData["Duration"] = $"{durationS / 3600}H {durationS % 3600 / 60}min {durationS % 3600 % 60}sec";
-                ViewBag.Genres = Helper.jsonContent.FirstOrDefault(s => s.id == id).genres;
+                ViewBag.Genres = movieDetails.Genres;
 
-                ViewData["LastUpdated"] = Helper.jsonContent.FirstOrDefault(s => s.id == id).lastUpdated;
-                ViewData["Quote"] = Helper.jsonContent.FirstOrDefault(s => s.id == id).quote;
-                ViewData["Rating"] = Helper.jsonContent.FirstOrDefault(s => s.id == id).rating;
-                ViewData["ReviewAuthor"] = Helper.jsonContent.FirstOrDefault(s => s.id == id).reviewAuthor;
-                ViewData["SkyGoId"] = Helper.jsonContent.FirstOrDefault(s => s.id == id).skyGoId;
-                ViewData["SkyGoUrl"] = Helper.jsonContent.FirstOrDefault(s => s.id == id).skyGoUrl;
-                ViewData["Sum"] = Helper.jsonContent.FirstOrDefault(s => s.id == id).sum;
-                ViewData["Url"] = Helper.jsonContent.FirstOrDefault(s => s.id == id).url;
+                ViewData["LastUpdated"] = movieDetails.LastUpdated;
+                ViewData["Quote"] = movieDetails.Quote;
+                ViewData["Rating"] = movieDetails.Rating;
+                ViewData["ReviewAuthor"] = movieDetails.ReviewAuthor;
+                ViewData["SkyGoId"] = movieDetails.SkyGoId;
+                ViewData["SkyGoUrl"] = movieDetails.SkyGoUrl;
+                ViewData["Sum"] = movieDetails.Sum;
+                ViewData["Url"] = movieDetails.Url;
 
-                ViewingWindow viewingResult = Helper.jsonContent.FirstOrDefault(s => s.id == id).viewingWindow;
+                ViewingWindow viewingResult = movieDetails.ViewingWindow;
                 if (viewingResult != null)
                 {
-                    ViewData["Title"] = viewingResult.title;
-                    ViewData["StartDate"] = viewingResult.startDate;
-                    ViewData["WayToWatch"] = viewingResult.wayToWatch;
-                    ViewData["EndDate"] = viewingResult.endDate;
+                    ViewData["Title"] = viewingResult.Title;
+                    ViewData["StartDate"] = viewingResult.StartDate;
+                    ViewData["WayToWatch"] = viewingResult.WayToWatch;
+                    ViewData["EndDate"] = viewingResult.EndDate;
                 }
-                ViewData["Year"] = Helper.jsonContent.FirstOrDefault(s => s.id == id).year;
+                ViewData["Year"] = movieDetails.Year;
 
                 IEnumerable<VideosD> vdResult = Helper.videosDownloaded.Where(s => s != null && s.Id == id);
                 if (vdResult != null)

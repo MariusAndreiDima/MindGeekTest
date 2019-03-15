@@ -1,16 +1,18 @@
-﻿<h2>@ViewData["Headline"]</h2>
+﻿@*@model MoviesDetails*@
+<h2>@ViewData["Headline"]</h2>
 <h3>@ViewData["Body"]</h3>
 <div>
     <p><b>CAST :</b></p>
     @foreach (Cast c in ViewBag.Cast)
     {
-        <p>@c.name  </p>
+        <p>@c.Name  </p>
+        
     }
 
     <p><b>Directors :</b></p>
     @foreach (Directors d in ViewBag.Directors)
     {
-        <p>@d.name</p>
+        <p>@d.Name</p>
     }
 
     <p>Cert : @ViewData["Cert"]</p>
